@@ -1,0 +1,245 @@
+<!DOCTYPE HTML>
+<HTML lang="en">
+
+<HEAD>
+    <meta charset="UTF-8">
+    <title>Sequence Diagram Creator</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <script src="libs/lz-string.min.js"></script>
+    <script src="libs/canvas2svg.min.js"></script>
+    <link rel="stylesheet" href="libs/codemirror.css">
+    <script src="libs/codemirror.min.js"></script>
+    <link rel="stylesheet" href="libs/show-hint.css">
+    <script src="libs/show-hint.js"></script>
+    <script src="libs/active-line.js"></script>
+    <link rel="stylesheet" href="libs/dialog.css">
+    <script src="libs/dialog.js"></script>
+    <script src="libs/searchcursor.js"></script>
+    <script src="libs/search.js"></script>
+    <script src="libs/annotatescrollbar.js"></script>
+    <link rel="stylesheet" href="libs/matchesonscrollbar.css">
+    <script src="libs/matchesonscrollbar.js"></script>
+    <script src="libs/jump-to-line.js"></script>
+    <script src="libs/rbush.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="index.css?v=9.1.0">
+    <link rel="stylesheet" href="print.css?v=9.1.0" type="text/css" media="print">
+    <script src="all.min.js?v=9.1.0"></script>
+</head>
+
+<body>
+    <div id="top">
+        <img id="logo" alt="Sequence Diagram Creator" src="assets/logo24x24.png">
+        <div id="activeFile">
+            <span id="activeFileStatus"><label for="activeFileNameChange"></label><input id="activeFileNameChange"><span
+                    id="activeFileNameStatus">untitled</span>
+        </div>
+        <!--lic-->
+    </div>
+    <div id="topRight">
+        <div>
+
+            <div class="dropdown">
+                <div id="menuButtonView" class="menuButton">View</div>
+                <div id="menuView" class="menuContent">
+                    <div id="menuViewPresentationMode" class="menuRow menuRowHighlight">
+                        <span id="presentationModeCheckbox"></span>&nbsp;Presentation Mode (Ctrl+M)
+                    </div>
+                    <div id="menuViewParticipantOverlay" class="menuRow menuRowHighlight" style="display: none;">
+                        <span id="participantOverlayCheckbox"></span>&nbsp;Participant Overlay
+                    </div>
+                    <div id="menuViewReadOnlyPresentationMode" class="menuRow menuRowHighlight" style="display: none;"
+                        title="check this to make the diagram read only in Presentation Mode">
+                        <span id="readOnlyPresentationModeCheckbox"></span>&nbsp;Read Only Presentation Mode
+                    </div>
+                </div>
+            </div>
+
+            <div class="dropdown" style="display: none;">
+                <div id="menuButtonSettings" class="menuButton">Settings</div>
+                <div id="menuSettings" class="menuContent">
+                    <div class="menuRow">
+                        <fieldset>
+                            <legend>Default (Ctrl+S / Ctrl+O) Storage</legend>
+                            <div id="menuSettingsDefaultStorageGoogleDrive" class="menuRow menuRowHighlight">
+                                <span id="defaultStorageRadioGoogleDrive"></span>&nbsp;Google Drive
+                            </div>
+                            <div id="menuSettingsDefaultStorageGoogleDriveRootFolder" class="menuRow menuRowHighlight">
+                                <span id="defaultStorageRadioGoogleDriveRootFolder"></span>&nbsp;Google Drive Root
+                                Folder
+                            </div>
+                            <div id="menuSettingsDefaultStorageOneDrive" class="menuRow menuRowHighlight">
+                                <span id="defaultStorageRadioOneDrive"></span>&nbsp;OneDrive
+                            </div>
+                            <div id="menuSettingsDefaultStorageWebStorage" class="menuRow menuRowHighlight">
+                                <span id="defaultStorageRadioWebStorage"></span>&nbsp;Web Storage (localStorage)
+                            </div>
+                            <div id="menuSettingsDefaultStorageLocalDisk" class="menuRow menuRowHighlight">
+                                <span id="defaultStorageRadioLocalDisk"></span>&nbsp;Local Disk
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div id="menuSettingsAlertForUnsavedChanges" class="menuRow menuRowHighlight">
+                        <span id="alertForUnsavedChangesCheckbox"></span>&nbsp;Alert for unsaved changes
+                    </div>
+                    <div id="menuSettingsAutosave" class="menuRow menuRowHighlight">
+                        <span id="autosaveCheckbox"></span>&nbsp;Autosave every 10 min if there are changes
+                    </div>
+                    <div id="menuSettingsSynchronizeFilenameWithTitle" class="menuRow menuRowHighlight">
+                        <span id="synchronizeFilenameWithTitleCheckbox"></span>&nbsp;Synchronize filename with title
+                        (legacy behavior)
+                    </div>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <div id="menuButtonHelp" class="menuButton">Help</div>
+                <div id="menuHelp" class="menuContent">
+                    <div class="menuRow menuRowHighlight">
+                        <a href="instructions.html" target="_blank">Instructions (new window)</a>
+                    </div>
+                    <div id="menuHelpInstructionsModalPopup" class="menuRow menuRowHighlight" style="display: none;">
+                        Instructions (modal popup)
+                    </div>
+                    <div id="menuHelpAbout" class="menuRow menuRowHighlight" style="display: none;">
+                        About (modal popup)
+                    </div>
+                </div>
+            </div>
+       </div>
+
+        <div id="notification"></div>
+    </div>
+
+    <div id="actions">
+        <img id="newDiagram" class="actionButton" src="assets/new.svg" title="new diagram" style="display: none;">
+        <img id="openButton" class="actionButton" src="assets/open.svg" title="open source text" style="display: none;">
+        <img id="saveButton" class="actionButton" src="assets/save.svg" title="save source text" style="display: none;">
+        <img id="exportButton" class="actionButton" src="assets/export01.svg" title="export diagram">
+        <hr class="separator">
+        <img id="addParticipant" class="actionButton" src="assets/participant01.svg" title="add participant"
+            style="display: none;">
+        <img id="zoomIn" class="actionButton" src="assets/zoomin.svg" title="zoom in">
+        <img id="zoomOut" class="actionButton" src="assets/zoomout.svg" title="zoom out">
+    </div>
+
+    <div id="source">
+        <div id="handleRight"></div>
+    </div>
+    <div id="handleWrapper">
+        <div id="handle">≡</div>
+    </div>
+
+    <canvas id="diagramCanvas" class="canvas" width="300" height="100">
+        Device not supported, use firefox or chrome or safari or ie 10+
+    </canvas>
+    <canvas id="participantCanvas" class="canvas" width="500" height="100"></canvas>
+    <div id="interactionCanvasWrapper">
+        <canvas id="interactionCanvas" class="canvas" width="300" height="100">
+            Device not supported, use firefox or chrome or safari or ie 10+
+        </canvas>
+    </div>
+
+    <div id="entryEditor">
+        <div id="entryEditorTop">&nbsp;<span id="entryEditorCloseIcon" title="close">✕</span></div>
+        <div id="participantEdit">
+            Participant alias<br>
+            <input id="participantAliasInput"><br><br>
+            Participant long name<br>
+        </div>
+        <textarea id="entryEditorTextArea"></textarea>
+        <div><span class="popupDialogButtons">
+                <button id="entryEditorCancel">Cancel</button>
+                <button id="entryEditorUpdate">Update (Ctrl + Enter)</button>
+            </span></div>
+    </div>
+
+    <div id="cover"></div>
+
+    <div id="openSourceMenu" class="openSaveMenu">
+        <button id="openButtonGoogleDrive">Open</button>
+        <br>
+        <br>
+        <span class="openSaveLabel">OneDrive</span><br>
+        <button id="openButtonOneDrive">Open</button>
+        <br>
+        <br>
+        <span class="openSaveLabel">Web Storage (localStorage)</span><br>
+        <button id="openButtonWebStorage">Open</button>
+        <br><br>
+        <span class="openSaveLabel">Local Disk</span><br>
+        <form>
+            <input id="openButtonLocalDisk" type="file">
+        </form>
+    </div>
+
+    <div id="saveSourceMenu" class="openSaveMenu">
+        <label for="fileName"></label><input id="fileName" type="text" size="40"><span class="smallText">.txt</span>
+        <button id="saveButtonGoogleDrive">Save</button>
+        <button id="saveInRootButtonGoogleDrive">Save in Root Folder</button>
+        <span class="openSaveLabel">OneDrive</span><br>
+        <button id="saveButtonOneDrive">Save</button>
+        <span class="openSaveLabel">Web Storage (localStorage)</span><br>
+        <button id="saveButtonWebStorage">Save</button>
+        <span class="openSaveLabel">Local Disk (download folder)</span><br>
+        <button id="saveButtonLocalDisk">Save</button>
+    </div>
+
+    <div id="exportDiagramMenu" class="openSaveMenu">
+        <span class="openSaveLabel">Export SVG</span><br>
+        <label for="fileName"></label><input id="fileNameExport" type="text" size="40"><span
+            class="smallText">.svg</span>
+        <br>
+        <br>
+        <button id="exportButtonSvg">Export</button>
+        <a href="#" id="exportButtonPngLink" style="display: none;"><button id="exportButtonPng">Export</button></a>
+        <button id="exportButtonCopyPaste" style="display: none;">Render</button>
+        <button id="exportButtonUrl" style="display: none;">Create</button>
+    </div>
+
+    <div class="popupDialog" id="imageSavePopup">
+    </div>
+
+    <div class="popupDialog" id="infoPopup">
+    </div>
+
+    <div class="popupDialog" id="shareUrlPopup">
+    </div>
+
+    <div class="popupDialog" id="webStoragePopup">
+        <div class="popupHead"><span class="popupTitle">Web Storage (localStorage)</span><span class="popupCloseIcon"
+                title="close">✕</span></div>
+        <div class="popupDialogInner">
+            <table id="webStorageDiagramTable">
+                <thead>
+                    <tr>
+                        <th id="toggleWebStorageSelection">☐</th>
+                    </tr>
+                </thead>
+                <tbody id="webStorageDiagramTableTBody">
+
+                </tbody>
+            </table>
+        </div>
+        <div class="popupDialogBottom"><span class="popupDialogButtons">
+                <button id="webStoragePopupCancel">Cancel</button>
+                <button id="webStorageDelete">Delete</button>
+                <button id="webStorageOpen">Open</button>
+            </span></div>
+    </div>
+
+    <div class="popupDialog" id="instructionsPopup">
+        <div class="popupHead">
+            <span class="popupTitle">Instructions</span><span class="popupCloseIcon" title="close">✕</span>
+        </div>
+        <div class="popupDialogInnerIFrame">
+            <iframe id="instructionsIFrame" frameborder="0"></iframe>
+        </div>
+    </div>
+
+    <script src="initMain.js"></script>
+</body>
+
+</html>
