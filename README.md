@@ -1,1 +1,1 @@
-# sequence-diagram-creator
+# sdc
